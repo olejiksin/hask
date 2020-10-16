@@ -2,7 +2,7 @@
 #### Sim(pencil game):
 
 #### wiki: https://en.wikipedia.org/wiki/Sim_(pencil_game)
-
+#### Пример игры: https://www.youtube.com/watch?v=_apsFik2JoQ
 #### Правила:
 1. Играют два игрока.
 2. Имеется шесть точек, соединенных друг с другом ребром.
