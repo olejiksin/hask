@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0d16fcbd1f5236fabb033f87c573cdf1a2ba4bf9864b9b73ea26aa838007cab2
+-- hash: dc0a7c4df00b8bcb77851d1501cbb2ea779a1851af9a58f95983b160218643a7
 
 name:           game
 version:        0.1.0.0
@@ -27,13 +27,22 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Game
+      Types
+      Types.Game
+      Types.Line
+      Types.Rules
   other-modules:
       Paths_game
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , mtl
+    , servant
+    , servant-server
+    , stm
   default-language: Haskell2010
 
 executable game-exe
@@ -44,8 +53,13 @@ executable game-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , game
+    , mtl
+    , servant
+    , servant-server
+    , stm
   default-language: Haskell2010
 
 test-suite game-test
@@ -57,6 +71,11 @@ test-suite game-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
     , game
+    , mtl
+    , servant
+    , servant-server
+    , stm
   default-language: Haskell2010

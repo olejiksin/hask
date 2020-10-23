@@ -1,6 +1,9 @@
-module Lib
-    ( someFunc
-    ) where
+{-# LANGUAGE DeriveGeneric #-}
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+module Types.Rules where
+
+import Types.Line
+import Types.Game
+import Data.Aeson
+import GHC.Generics
+
