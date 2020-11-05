@@ -1,3 +1,4 @@
-module Lib (mkApp) where
+module Lib (someFunc) where
 
-import Api
+someFunc :: IO ()
+someFunc = putStrLn "someFunc"

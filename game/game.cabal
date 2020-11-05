@@ -4,16 +4,13 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dc0a7c4df00b8bcb77851d1501cbb2ea779a1851af9a58f95983b160218643a7
+-- hash: 5737b42ae243b4009d0d86d7469aee66aac55418bcaa64a76beadd33005c6318
 
 name:           game
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/game#readme>
-homepage:       https://github.com/githubuser/game#readme
-bug-reports:    https://github.com/githubuser/game/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
+author:         biba
+maintainer:     biba
+copyright:      2020 biba name here
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -21,17 +18,13 @@ extra-source-files:
     README.md
     ChangeLog.md
 
-source-repository head
-  type: git
-  location: https://github.com/githubuser/game
-
 library
   exposed-modules:
       Game
+      Lib
       Types
       Types.Game
       Types.Line
-      Types.Rules
   other-modules:
       Paths_game
   hs-source-dirs:
@@ -39,8 +32,10 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , http-client
     , mtl
     , servant
+    , servant-client
     , servant-server
     , stm
   default-language: Haskell2010
@@ -56,10 +51,13 @@ executable game-exe
       aeson
     , base >=4.7 && <5
     , game
+    , http-client
     , mtl
     , servant
+    , servant-client
     , servant-server
     , stm
+    , warp
   default-language: Haskell2010
 
 test-suite game-test
@@ -74,8 +72,10 @@ test-suite game-test
       aeson
     , base >=4.7 && <5
     , game
+    , http-client
     , mtl
     , servant
+    , servant-client
     , servant-server
     , stm
   default-language: Haskell2010
