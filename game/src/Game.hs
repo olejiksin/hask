@@ -21,7 +21,6 @@ paintLine gs line player =
      move = (move gs + 1) `mod` (length $ players gs),
      gameLines = take k (gameLines gs) ++ [colorLine] ++ drop(k+1) (gameLines gs),
      players = updPlayers} 
- --players = take m (players gs) ++ [updatePlayer] ++ drop(m+1) (players gs)} 
  in if colorForLine line == Black
     then do 
      Right $ checkTriangle (players gss) gss
@@ -82,8 +81,6 @@ triangles=Triangles{
 containt::[[Int]]->[[Int]]->Bool
 containt [] b = True
 containt a b = (head a) `elem` b && containt (tail a) b
-
-
 --проверка наличия элементов списка [[[a]]] в другом списке [[b]]
 contains::[[[Int]]]->[[Int]]->Bool
 contais [] b = True
