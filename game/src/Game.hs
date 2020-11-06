@@ -64,7 +64,7 @@ comb a b c = comb (a-1) b c ++ combin a b c
 
 check::Int -> [[[Int]]]
 check 0 = []
-check n = comb (n-1) (n-1) (n-1) ++ check (n-1)
+check n =nub( comb (n-1) (n-1) (n-1) ++ check (n-1))
  
 
 --тип со всеми случаями появления треугольников
@@ -74,7 +74,7 @@ data Triangles=Triangles
  }deriving(Show)
 
 triangles=Triangles{
- trian=check 15
+ trian= check 15
  }
 
 
