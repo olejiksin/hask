@@ -6,7 +6,7 @@ import Types.Line
 import Data.Aeson(FromJSON,ToJSON)
 import GHC.Generics
 
---Игрок: массив закрашенных им линий, его номер(1 или 2), какой его цвет(зеленый/синий)
+--Игрок: массив закрашенных им линий, его номер(0 или 1), какой его цвет(зеленый/красный)
 data Player=Player
  {
  numb::Int,
@@ -16,7 +16,7 @@ data Player=Player
 instance FromJSON Player
 instance ToJSON Player
 
---Состояние игры: список из двух игроков, номер хода, cписок линий, получен ли треугольник, какой id победителя(0-default)
+--Состояние игры: список из двух игроков, чей ход, cписок линий, получен ли треугольник, какой id победителя(2-default)
 data GameState=GameState
  {
  players::[Player],

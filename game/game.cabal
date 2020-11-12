@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5737b42ae243b4009d0d86d7469aee66aac55418bcaa64a76beadd33005c6318
+-- hash: 953de1c981d296abc24a2e6fe1277ff4515add05e439e030e717e2907a1a68b3
 
 name:           game
 version:        0.1.0.0
@@ -60,7 +60,7 @@ executable game-exe
     , warp
   default-language: Haskell2010
 
-test-suite game-test
+test-suite game2-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
@@ -72,10 +72,14 @@ test-suite game-test
       aeson
     , base >=4.7 && <5
     , game
+    , hedgehog
     , http-client
     , mtl
     , servant
     , servant-client
     , servant-server
     , stm
+    , tasty
+    , tasty-hedgehog
+    , tasty-hunit
   default-language: Haskell2010

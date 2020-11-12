@@ -1,20 +1,22 @@
 module Game where
 
 import Types
+import Control.Monad
 import Data.List
 import Data.Either
 import Data.Maybe
 
 
 --закрашивание линии игроком
-paintLine:: GameState -> Line -> Player -> Either String GameState
-paintLine gs line player = 
+paintLine:: GameState -> Line -> Either String GameState
+paintLine gs line = 
  let 
+  player = (players gs)!!(move gs)
   m = numb player
   k = fromJust (elemIndex line (gameLines gs))
   colorLine = Line{colorForLine = color player,connection = connection line}
-  updatePlayer = Player{coloredLines = (coloredLines player) ++ [colorLine], color = color player, numb = numb player}
-  updPlayers = if m==2
+  updatePlayer = player{coloredLines = (coloredLines player) ++ [colorLine]}
+  updPlayers = if m==1
          then [(players gs)!!0, updatePlayer]
          else [updatePlayer, (players gs)!!1]
   gss = gs{
@@ -28,14 +30,14 @@ paintLine gs line player =
 
 
 --проверка на наличие треугольника после закрашивания линии
-checkTriangle:: [Player] -> GameState ->GameState
-checkTriangle playerss gss = do
- let results = [contains (trian triangles) (pars(coloredLines (playerss!!0)))] ++ [contains (trian triangles) (pars(coloredLines (playerss!!1)))]
+checkTriangle:: [Player] -> GameState -> GameState
+checkTriangle pla gss = do
+ let results = [contains (trian triangles) (pars(coloredLines (pla!!0)))] ++ [contains (trian triangles) (pars(coloredLines (pla!!1)))]
  if (results!!0 == True) || (results!!1 == True)
-  then do if results!!0 == True
-          then gss{result=1}
-          else gss{result=2}
-  else gss
+  then do if (results!!0) == True
+           then gss{result=0,triangle=True}
+           else gss{result=1,triangle=True}
+  else gss{result=2}
 
 
 --получение connection линий 
@@ -80,11 +82,11 @@ triangles=Triangles{
 
 containt::[[Int]]->[[Int]]->Bool
 containt [] b = True
-containt a b = (head a) `elem` b && containt (tail a) b
+containt a b = containt (tail a) b && (head a) `elem` b
 --проверка наличия элементов списка [[[a]]] в другом списке [[b]]
 contains::[[[Int]]]->[[Int]]->Bool
-contais [] b = True
-contains a b =  containt (head a) b && contains (tail a) b
+contains [] b = False
+contains a b = contains (tail a) b || containt (head a) b
 
 --генерация списка линий
 genLin::Int -> Int -> [Line]
@@ -102,12 +104,12 @@ initialState::GameState
 initialState = GameState
  --инициализация двух игроков
  { players = [
-  Player{numb=1,coloredLines=[],color=Green},
-  Player{numb=2,coloredLines=[],color=Blue}],
- --номер хода
+  Player{numb=0,coloredLines=[],color=Green},
+  Player{numb=1,coloredLines=[],color=Red}],
+ --чей ход
  move=0,
- --numb игрока, который победил(1 или 2, 0 - default) 
- result=0,
+ --numb игрока, который победил(0 или 1, 2 - default) 
+ result=2,
  --есть ли закрашенный треугольник
  triangle=False,
  --список всех линий

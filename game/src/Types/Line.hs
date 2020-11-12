@@ -3,12 +3,13 @@
 module Types.Line where
 
 import Data.Aeson(FromJSON,ToJSON)
+import Data.List (findIndex)
 import GHC.Generics
 
 --Всего три цвета для линий: черный(default/неокрашенная), зеленый(первый игрок), синий(второй игрок)
 data Color
  = Green
- | Blue
+ | Red
  | Black
  deriving(Eq,Show,Read,Enum,Generic)
  
@@ -25,5 +26,18 @@ data Line=Line
 instance FromJSON Line
 instance ToJSON Line
 
+allColorString,allConnectionFirstString,allConnectionSecondString::String
+allColorString = "BGR"
+allConnectionFirstString = "12345"
+allConnectionSecondString = "23456"
+
+parseLine::String -> Maybe Line
+parseLine [cl,fCon,sCon]
+ = mLine
+ <$> findIndex (==cl)  allColorString
+ <*> findIndex (==fCon) allConnectionFirstString
+ <*> findIndex (==sCon) allConnectionSecondString
+ where mLine cli fConn sConn = Line (toEnum cli) ([fConn,sConn]) 
+parseLine _=Nothing
 
 

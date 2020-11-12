@@ -40,8 +40,9 @@ executables:
     dependencies:
     - game
     - warp
+    
 tests:
-  game-test:
+  game2-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -50,3 +51,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - game
+    - tasty
+    - tasty-hunit
+    - tasty-hedgehog
+    - hedgehog
