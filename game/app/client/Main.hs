@@ -3,7 +3,6 @@ module Main where
 import Lib
 import Types
 
-import GHC.IO.Encoding
 import Control.Monad.IO.Class
 
 game :: ClientM ()
@@ -19,7 +18,6 @@ game = do
 
 main :: IO ()
 main = do
-  setLocaleEncoding utf8
   let baseUrl = BaseUrl Http "localhost" 8080 ""
   res <- runClient baseUrl game
   case res of

@@ -27,7 +27,7 @@ instance FromJSON Line
 instance ToJSON Line
 
 allColorString,allConnectionFirstString,allConnectionSecondString::String
-allColorString = "BGR"
+allColorString = "GRB"
 allConnectionFirstString = "12345"
 allConnectionSecondString = "23456"
 
@@ -37,7 +37,7 @@ parseLine [cl,fCon,sCon]
  <$> findIndex (==cl)  allColorString
  <*> findIndex (==fCon) allConnectionFirstString
  <*> findIndex (==sCon) allConnectionSecondString
- where mLine cli fConn sConn = Line (toEnum cli) ([fConn,sConn]) 
-parseLine _=Nothing
+ where mLine cli fConn sConn = Line (toEnum cli) ([fConn+1,sConn+2]) 
+parseLine _ = Nothing
 
 
