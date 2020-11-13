@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 953de1c981d296abc24a2e6fe1277ff4515add05e439e030e717e2907a1a68b3
+-- hash: b6b0eecf398d3e46aa8314d45b13b556a0d787736901706207b2d81b753fa9b5
 
 name:           game
 version:        0.1.0.0
@@ -20,6 +20,7 @@ extra-source-files:
 
 library
   exposed-modules:
+      Api
       Game
       Lib
       Types
@@ -38,14 +39,15 @@ library
     , servant-client
     , servant-server
     , stm
+    , stylish-haskell
   default-language: Haskell2010
 
-executable game-exe
+executable game-client
   main-is: Main.hs
   other-modules:
       Paths_game
   hs-source-dirs:
-      app
+      app/client
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -57,6 +59,28 @@ executable game-exe
     , servant-client
     , servant-server
     , stm
+    , stylish-haskell
+  default-language: Haskell2010
+
+executable game-server
+  main-is: Main.hs
+  other-modules:
+      Paths_game
+  hs-source-dirs:
+      app/server
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , game
+    , http-client
+    , mtl
+    , optparse-generic
+    , servant
+    , servant-client
+    , servant-server
+    , stm
+    , stylish-haskell
     , warp
   default-language: Haskell2010
 
@@ -79,6 +103,7 @@ test-suite game2-test
     , servant-client
     , servant-server
     , stm
+    , stylish-haskell
     , tasty
     , tasty-hedgehog
     , tasty-hunit

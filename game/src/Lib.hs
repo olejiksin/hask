@@ -1,4 +1,3 @@
-module Lib (someFunc) where
+module Lib (module Api) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import Api

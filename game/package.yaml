@@ -25,14 +25,15 @@ dependencies:
  - mtl
  - servant-client
  - http-client
-
+ - stylish-haskell
+ 
 library:
   source-dirs: src
 
 executables:
-  game-exe:
+  game-server:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         app/server
     ghc-options:
     - -threaded
     - -rtsopts
@@ -40,6 +41,17 @@ executables:
     dependencies:
     - game
     - warp
+    - optparse-generic
+    
+  game-client:
+    main:                Main.hs
+    source-dirs:         app/client
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - game
     
 tests:
   game2-test:
