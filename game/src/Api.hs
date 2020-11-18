@@ -12,6 +12,8 @@ import Types
 import Game
 
 
+import GHC.IO.Encoding
+
 import Control.Concurrent.STM
 import Control.Monad.IO.Class
 import Control.Monad.Reader
@@ -55,6 +57,7 @@ gameApi = Proxy
 
 mkApp :: IO Application
 mkApp = do
+ --setLocaleEncoding utf8
  s <- return initialState
  sv <- newTMVarIO s
  pure $ 
