@@ -9,27 +9,26 @@ module Main where
 
 import Lib
 
+import Options
+import ServOpt
+import Control.Lens.Lens ((&))
+import Data.Streaming.Network.Internal (HostPreference (Host))
 import GHC.Generics
 import GHC.IO.Encoding
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.Map (empty)
 import Network.Wai.Handler.Warp
 import Options.Generic
 
-data CliOpts w = CliOpts
-  { port :: w ::: Int <?> "Port to run server"
-  , host :: w ::: Maybe String <?> "Host preference"
-  , timeout :: w ::: Maybe Int <?> "Timeout for Slowloris"
-  } deriving (Generic)
-
-instance ParseRecord (CliOpts Wrapped)
-deriving instance Show (CliOpts Unwrapped)
+cliOpts :: ServOpt -> Settings
+cliOpts opts = defaultSettings
+ & setHost(Host $ opts & host)
+ & setPort(opts & port)
+ & setTimeout(opts & timeout)
 
 main :: IO ()
-main = do
+main = runCommand $ \opts _ -> do
   setLocaleEncoding utf8
-  opts <- unwrapRecord "Eleusis server"
-  app <- mkApp
-  let settings = setPort (port opts) $
-        maybe id (setHost . read) (host opts) $
-        maybe id setTimeout (timeout opts) $
-        defaultSettings
-  runSettings settings app
+  let warpSets = cliOpts opts 
+  allGames <- atomically empty
+  runSettings warpSets $ servGame allGames

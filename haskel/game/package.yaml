@@ -22,7 +22,12 @@ dependencies:
  - servant
  - servant-server
  - stm
+ - options
+ - lens
+ - streaming-commons
  - mtl
+ - uuid
+ - ttrie
  - servant-client
  - http-client
  - stylish-haskell
@@ -43,15 +48,6 @@ executables:
     - warp
     - optparse-generic
     
-  game-client:
-    main:                Main.hs
-    source-dirs:         app/client
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - game
     
 tests:
   game2-test:

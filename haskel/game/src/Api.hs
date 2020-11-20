@@ -1,5 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 
 module Api
   ( module Api
@@ -8,12 +11,17 @@ module Api
   , ClientM
   ) where
 
+import Prelude hiding (lookup)
+
 import Types
 import Game
 
 
 import GHC.IO.Encoding
-
+import Control.Monad.Error.Class
+import Control.Concurrent.STM.Map (Map, insert, lookup)
+import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 import Control.Concurrent.STM
 import Control.Monad.IO.Class
 import Control.Monad.Reader
@@ -22,53 +30,67 @@ import Servant
 import Servant.API
 import Servant.Client
 
-type GameAPI = "state" :> Get '[JSON] GameState
-  :<|> "paint" :> ReqBody '[JSON] Line :> Post '[JSON] GameState
+type AllGames = Map UUID GameState
 
-type AppM = ReaderT (TMVar GameState) Handler
+type GameAPI = 
+  "newGame" :> Post '[JSON] UUID
+  :<|> "state" :> Header "gameId" UUID :> Get '[JSON] GameState
+  :<|> "paint" :> Header "gameId" UUID :> ReqBody '[JSON] Line :> Post '[JSON] GameState
 
+gameHandler :: AllGames -> AppM a -> Handler a
+gameHandler = flip runReaderT
 
-gameServer :: ServerT GameAPI AppM
-gameServer = stateGet :<|> paintPost
-
-stateGet :: AppM GameState
-stateGet = do
-  sv <- ask
-  s <- liftIO $ atomically $ readTMVar sv
-  pure s
-
-paintPost::Line ->AppM GameState
-paintPost line = do
- sv <- ask
- gs' <- liftIO $ atomically $ do
-  gs <- takeTMVar sv
-  case paintLine gs line of
-   Left e -> pure $ Left e
-   Right gs' -> do
-    putTMVar sv gs'
-    pure $ Right gs'
- case gs' of
-  Left _e -> throwError err401
-  Right gs' -> pure gs'
+type AppM = ReaderT AllGames Handler
 
 gameApi :: Proxy GameAPI
 gameApi = Proxy
 
+servGame:: AllGames -> Application
+servGame allGames =
+ serve gameApi
+ $ hoistServer gameApi (gameHandler allGames) gameServer
 
-mkApp :: IO Application
-mkApp = do
- --setLocaleEncoding utf8
- s <- return initialState
- sv <- newTMVarIO s
- pure $ 
-  serve gameApi $
-  hoistServer gameApi (flip runReaderT sv) gameServer
+gameServer :: ServerT GameAPI AppM
+gameServer = 
+ createNewPost :<|>
+ stateGet :<|> 
+ paintPost 
+ where
+  createNewPost::AppM UUID
+  createNewPost = do
+   allGames <- ask
+   newGameId <- liftIO nextRandom
+   liftIO $ atomically $ insert newGameId initialState allGames
+   logFromServerAction $ "game with uuid was created: " ++ show newGameId
+   return newGameId
+   
+  stateGet :: Maybe UUID ->AppM GameState
+  stateGet Nothing = return400error $ "No uuid"
+  stateGet (Just uuid) = do
+   allGames <- ask
+   gameState <- liftIO $ atomically $ lookup uuid allGames
+   case gameState of
+    Just gameState -> return gameState
+    Nothing -> return400error $ "No game with uuid"
+   
+  paintPost:: Maybe UUID -> Line -> AppM GameState
+  paintPost Nothing _ = return400error $ "No uuid, sry"
+  paintPost maybeUuid@(Just uuid) line = do
+   gameState <- stateGet maybeUuid
+   case paintLine gameState line of
+    Left errorMessage -> do
+     return400error $ errorMessage
+    Right modifiedGame -> do
+     allGames <- ask
+     liftIO $ atomically $ insert uuid modifiedGame allGames
+     return modifiedGame
+   
  
-getState :: ClientM GameState
-postPaint :: Line -> ClientM GameState
-getState :<|> postPaint = client gameApi 
+  return400error msg = throwError $ err400{errReasonPhrase = msg}
+  
+  logFromServerAction :: String -> AppM ()
+  logFromServerAction message = liftIO $ print $ message
  
-runClient :: BaseUrl -> ClientM a -> IO (Either ClientError a)
-runClient baseUrl actions = do
-  mgr <- newManager defaultManagerSettings
-  runClientM actions $ mkClientEnv mgr baseUrl
+
+
+

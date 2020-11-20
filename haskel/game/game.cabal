@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b6b0eecf398d3e46aa8314d45b13b556a0d787736901706207b2d81b753fa9b5
+-- hash: 7fa31a713affc017d47ee57de2066fefbf8ee0333ed07e58d79bf2feeceecf73
 
 name:           game
 version:        0.1.0.0
@@ -34,37 +34,23 @@ library
       aeson
     , base >=4.7 && <5
     , http-client
+    , lens
     , mtl
+    , options
     , servant
     , servant-client
     , servant-server
     , stm
+    , streaming-commons
     , stylish-haskell
-  default-language: Haskell2010
-
-executable game-client
-  main-is: Main.hs
-  other-modules:
-      Paths_game
-  hs-source-dirs:
-      app/client
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      aeson
-    , base >=4.7 && <5
-    , game
-    , http-client
-    , mtl
-    , servant
-    , servant-client
-    , servant-server
-    , stm
-    , stylish-haskell
+    , ttrie
+    , uuid
   default-language: Haskell2010
 
 executable game-server
   main-is: Main.hs
   other-modules:
+      ServOpt
       Paths_game
   hs-source-dirs:
       app/server
@@ -74,13 +60,18 @@ executable game-server
     , base >=4.7 && <5
     , game
     , http-client
+    , lens
     , mtl
+    , options
     , optparse-generic
     , servant
     , servant-client
     , servant-server
     , stm
+    , streaming-commons
     , stylish-haskell
+    , ttrie
+    , uuid
     , warp
   default-language: Haskell2010
 
@@ -98,13 +89,18 @@ test-suite game2-test
     , game
     , hedgehog
     , http-client
+    , lens
     , mtl
+    , options
     , servant
     , servant-client
     , servant-server
     , stm
+    , streaming-commons
     , stylish-haskell
     , tasty
     , tasty-hedgehog
     , tasty-hunit
+    , ttrie
+    , uuid
   default-language: Haskell2010
