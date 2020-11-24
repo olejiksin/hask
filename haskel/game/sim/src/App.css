@@ -1,0 +1,15 @@
+
+svg {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-height: 600px;
+    margin-top: 50px;
+    display: flex;
+    top: 20%;
+}
+
+line{
+    cursor: pointer;
+}
+

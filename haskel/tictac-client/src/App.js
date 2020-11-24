@@ -40,28 +40,7 @@ function App() {
     };
     const [state, dispatch] = useReducer(reducer, initState);
 
-    // useEffect(() => {
-    //     if (state.moved === true) {
-    //         axios.get('/GetGameState', {headers: {'Game-Uuid': state.gameUUID}})
-    //             .then((resp) => {
-    //                 let boar = resp.data.GameBoard.CellList;
-    //                 for (let i = 0; i < 9; i++) {
-    //                     if (boar[i].SegmentState !== 'Free') {
-    //                         document.getElementsByClassName("smallBoard " + cellls[i]).innerText = boar[i].SegmentState;
-    //                     } else {
-    //                         for (let j = 0; i < 9; j++) {
-    //                             if (boar[i].CellList[j].State !== 'Free') {
-    //                                 document.getElementsByClassName("cell " + cellls[i]).innerText = boar[i].CellList[j].State;
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //                 dispatch({type: 'move', payload: false})
-    //             })
-    //             .catch((er) => console.log(er))
-    //     }
-    // });
-
+    console.log('ekk');
     setInterval(() => {
         if (state.gameUUID !== null && state.player !== null) {
             axios.get('/GetGameState', {headers: {'Game-Uuid': state.gameUUID}})
