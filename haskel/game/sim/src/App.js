@@ -26,9 +26,13 @@ function reducer(state, action) {
         case 'lose': {
             return {...state, game: action.payload}
         }
+        case 'bot': {
+            return {...state, bot: action.payload}
+        }
     }
 }
-let flag1=false;
+
+let flag1 = false;
 let flag = false;
 
 function App() {
@@ -37,10 +41,10 @@ function App() {
         player: null,
         uuid: null,
         game: null,
-        move: 0
+        move: 0,
+        bot: null
     };
     const [state, dispatch] = useReducer(reducer, initState);
-
 
     function createNew() {
         axios.post('/newGame')
@@ -59,7 +63,9 @@ function App() {
         for (let i = 0; i < 15; i++) {
             lines[i].onclick = (event) => {
                 console.log(event.target.id);
-                paint(lines[i], event, lines[i].getAttribute('stroke'))
+                if (state.move === state.id) {
+                    paint(lines[i], event, lines[i].getAttribute('stroke'))
+                }
             };
             if (state.id !== null && flag === false) {
                 lines[i].setAttribute('id', lines[i].link.fromId + '' + lines[i].link.toId);
@@ -79,14 +85,14 @@ function App() {
             if (state.uuid !== null && state.player !== null) {
                 axios.get('/state', {headers: {'gameId': state.uuid}})
                     .then((resp) => {
+                        console.log(resp.data);
                         let lines = document.getElementsByTagName('line');
                         if (state.id !== null) {
-                            for (let i = 14; i >=0 ; i--) {
-                                lines[i].setAttribute('stroke', resp.data.gameLines[14-i].colorForLine);
+                            for (let i = 14; i >= 0; i--) {
+                                lines[i].setAttribute('stroke', resp.data.gameLines[14 - i].colorForLine);
                             }
                         }
                         if (resp.data.result !== 2) {
-                            console.log(resp.data.result);
                             changer('lose', resp.data.result);
                         }
                         changer('move', resp.data.move);
@@ -97,6 +103,20 @@ function App() {
         }
     }, 900);
 
+    const botSet = () => {
+        if (state.id !== null) {
+            let id = state.id === 0 ? 1 : 0;
+            changer('bot', id);
+        }
+    };
+
+    if (flag1 === false && state.bot === 0 && state.move===0) {
+        setTimeout(() => {
+            axios.post('/bot', null, {headers: {'gameId': state.uuid, 'bot': state.bot}})
+                .then((resp)=>changer('move',resp.data.move))
+                .catch((er) => console.log(er));
+        }, 500);
+    }
 
     const paint = (line, event, color) => {
         if (state.move === state.id && color === 'Black') {
@@ -111,13 +131,23 @@ function App() {
                     changer('move', resp.data.move);
                 })
                 .catch((er) => console.log(er));
+            setTimeout(() => {
+                if (state.bot === 1 && state.result !== null && flag1===false) {
+                    axios.post('/bot', null, {headers: {'gameId': state.uuid, 'bot': state.bot}})
+                        .then(()=>changer('move',0))
+                        .catch((er) => console.log(er));
+                }
+            }, 500);
         } else {
             console.log('ne tot')
         }
     };
 
 
-    if (state.game !== 2 && state.game !== null && flag1===false) {flag1=true; alert(`Проиграл игрок: ${state.game === 0 ? 'Зеленый' : 'Красный'}`);}
+    if (state.game !== 2 && state.game !== null && flag1 === false) {
+        flag1 = true;
+        alert(`Проиграл игрок: ${state.game === 0 ? 'Зеленый' : 'Красный'}`);
+    }
 
     useEffect(() => {
         let graph = Viva.Graph.graph();
@@ -141,6 +171,7 @@ function App() {
         });
         renderer.run();
     }, []);
+
     return (
         <div>
             <br/>
@@ -153,6 +184,7 @@ function App() {
                 <br/>
                 <h4>UUID игры : {state.uuid}</h4>
                 <h4>Граф можно приблизить, отдалить, двигать</h4>
+                <h4>Выбрать цвет:</h4>
                 <button onClick={() => {
                     let data = {
                         color: 'red',
@@ -170,6 +202,10 @@ function App() {
                 }}>Зеленый
                 </button>
                 <h3>Твой цвет : {state.player === null ? 'Nothing' : state.player}</h3>
+                <h3>Играть с ботом?</h3>
+                <button onClick={() => botSet()}>Да</button>
+                <button>Нет</button>
+                <br/>
                 <h2>Сейчас ходит игрок
                     : {state.move === 1 ? 'Red player' : null || state.move === 0 ? 'Green player' : null}</h2>
                 <div id={'game'}></div>

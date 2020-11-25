@@ -35,6 +35,7 @@ type AllGames = Map UUID GameState
 type GameAPI = 
   "newGame" :> Post '[JSON] UUID
   :<|> "state" :> Header "gameId" UUID :> Get '[JSON] GameState
+  :<|> "bot"   :> Header "gameId" UUID :> Header "bot" Int :> Post '[JSON] GameState
   :<|> "paint" :> Header "gameId" UUID :> ReqBody '[JSON] Line :> Post '[JSON] GameState
 
 gameHandler :: AllGames -> AppM a -> Handler a
@@ -54,6 +55,7 @@ gameServer :: ServerT GameAPI AppM
 gameServer = 
  createNewPost :<|>
  stateGet :<|> 
+ botSet :<|>
  paintPost 
  where
   createNewPost::AppM UUID
@@ -72,7 +74,19 @@ gameServer =
    case gameState of
     Just gameState -> return gameState
     Nothing -> return400error $ "No game with uuid"
-   
+  
+  botSet :: Maybe UUID -> Maybe Int -> AppM GameState
+  botSet Nothing _  = return400error $ "No uuid, sry"
+  botSet maybeUuid@(Just uuid) (Just botId) = do
+   stateGame <- stateGet maybeUuid
+   case botPaint stateGame botId of
+    Left errorMessage -> do
+     return400error $ errorMessage
+    Right modifiedGame -> do
+     allGames <- ask
+     liftIO $ atomically $ insert uuid modifiedGame allGames
+     return modifiedGame
+  
   paintPost:: Maybe UUID -> Line -> AppM GameState
   paintPost Nothing _ = return400error $ "No uuid, sry"
   paintPost maybeUuid@(Just uuid) line = do

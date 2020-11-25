@@ -7,6 +7,39 @@ import Data.Either
 import Data.Maybe
 
 
+--тип со всеми случаями появления треугольников
+data Triangles=Triangles
+ {
+ trian::[[[Int]]]
+ }deriving(Show)
+
+triangles=Triangles{
+ trian= check 15
+ }
+
+--Bot 
+checker :: Int -> GameState -> [[[Int]]] -> Int -> Int -> Either String GameState
+checker botId gs triangles 19 2 = Left $ "Nothing"
+checker botId gs triangles 19 j = checker botId gs triangles 0 (j+1)
+checker botId gs triangles i  j = do
+ if ((Line (Black) ((triangles!!i)!!j)) `elem` (gameLines gs))
+  then do 
+   let afterPaint = paintLine gs (Line (Black) ((triangles!!i)!!j))
+   case afterPaint of
+    Left error -> do
+     Left $ error
+    Right afterPaint -> do
+     if (contains (triangles) (pars(coloredLines ((players afterPaint)!!botId)))) == False
+      then paintLine gs (Line (Black) ((triangles!!i)!!j))
+      else checker botId gs triangles (i+1) j
+ else checker botId gs triangles (i+1) j
+  
+botPaint ::  GameState -> Int-> Either String GameState
+botPaint gs botId  = do
+ let allTrs = trian triangles 
+ checker botId gs allTrs 0 0
+ 
+
 --закрашивание линии игроком
 paintLine:: GameState -> Line -> Either String GameState
 paintLine gs line = 
@@ -68,16 +101,6 @@ check::Int -> [[[Int]]]
 check 0 = []
 check n =nub( comb (n-1) (n-1) (n-1) ++ check (n-1))
  
-
---тип со всеми случаями появления треугольников
-data Triangles=Triangles
- {
- trian::[[[Int]]]
- }deriving(Show)
-
-triangles=Triangles{
- trian= check 15
- }
 
 
 containt::[[Int]]->[[Int]]->Bool

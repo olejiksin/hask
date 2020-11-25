@@ -16,7 +16,7 @@ data Player=Player
 instance FromJSON Player
 instance ToJSON Player
 
---Состояние игры: список из двух игроков, чей ход, cписок линий, получен ли треугольник, какой id победителя(2-default)
+--Состояние игры: список из двух игроков, чей ход, cписок линий, получен ли треугольник, какой id победителя(2-default), 
 data GameState=GameState
  {
  players::[Player],
