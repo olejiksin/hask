@@ -1,0 +1,59 @@
+name:                ultimate-tic-tac-toe
+version:             0.2.0.0
+github:              "zadykian/ultimate-tic-tac-toe"
+license:             BSD3
+author:              "Alexander Zadykian"
+maintainer:          "zadykian@outlook.com"
+copyright:           "2020 zadykian"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            ultimate tic-tac-toe
+# category:            game
+
+dependencies:
+- base >= 4.7 && < 5
+- lens
+- uuid
+- aeson
+- stm
+- servant
+- servant-server
+- servant-swagger
+- servant-swagger-ui
+- swagger2
+- warp
+- options
+- streaming-commons
+- transformers
+- ttrie
+- time
+
+library:
+  source-dirs: src
+
+executables:
+  ultimate-tic-tac-toe-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - ultimate-tic-tac-toe
+
+tests:
+  ultimate-tic-tac-toe-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - ultimate-tic-tac-toe
+    - HUnit

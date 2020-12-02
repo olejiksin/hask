@@ -2,8 +2,7 @@ import './App.css';
 import React from "react";
 import axios from 'axios';
 
-const {useReducer, useEffect} = React;
-
+const {useReducer} = React;
 
 function reducer(state, action) {
     switch (action.type) {
@@ -24,8 +23,14 @@ function reducer(state, action) {
         }
         case 'move': {
             return {
-                ...state, moved: action.payload
+                ...state, move: action.payload
             }
+        }
+        case 'bot': {
+            return {...state, bot: action.payload}
+        }
+        case 'seg': {
+            return {...state, segment: action.payload}
         }
     }
 }
@@ -36,34 +41,73 @@ function App() {
         player: null,
         gameUUID: null,
         data: null,
-        moved: false
+        move: 'X',
+        bot: null,
+        segment: 'any'
     };
     const [state, dispatch] = useReducer(reducer, initState);
 
-    console.log('ekk');
-    setInterval(() => {
+    const setBot = (checker) => {
+        if (state.player !== null && checker === 'bot') {
+            dispatch({type: 'bot', payload: state.player === 'X' ? 'O' : 'X'});
+        }
+        if (checker === 'null' && state.bot !== null) {
+            dispatch({type: 'bot', payload: null});
+        }
+    };
+
+    if (state.bot === state.move) {
+        setTimeout(() => {
+            let data = {
+                GlobalBoardPosition: 0,
+                LocalBoardPosition: 0,
+                Player: state.bot
+            };
+            axios.post('/BotMove', data, {headers: {'Game-Uuid': state.gameUUID}})
+                .then((resp) => {
+                    change('move', state.bot === 'X' ? 'O' : 'X');
+                })
+                .catch((er) => console.log(er));
+        }, 800);
+    }
+
+
+    let inter = setInterval(() => {
         if (state.gameUUID !== null && state.player !== null) {
             axios.get('/GetGameState', {headers: {'Game-Uuid': state.gameUUID}})
                 .then((resp) => {
                     let boar = resp.data.GameBoard.CellList;
                     for (let i = 0; i < 9; i++) {
-                        if (boar[i].SegmentState !== "Free") {
-                            document.getElementsByClassName("smallBoard " + cellls[i]).innerText = boar[i].SegmentState.OwnedBy;
+                        if (boar[i].SegmentState.State !== 'Free') {
+                            console.log(resp.data.GameBoard);
+                            document.getElementsByClassName('smallBoard ' + cellls[i])[0].innerHTML = null;
+                            document.getElementsByClassName('smallBoard ' + cellls[i])[0].innerHTML = `${boar[i].SegmentState.OwnedBy}`;
                         }
                         for (let j = 0; j < 9; j++) {
-                            if (boar[i].CellList[j].State !== "Free") {
-                                let id = parseInt(i + "" + j);
-                                document.getElementById(id).innerText = boar[i].CellList[j].OwnedBy;
+                            if (boar[i].SegmentState.State === 'Free') {
+                                let id = i + "" + j;
+                                setTimeout(() => {
+                                    if (boar[i].CellList[j].State !== 'Free') {
+                                        document.getElementById(id).innerText = boar[i].CellList[j].OwnedBy;
+                                        if (state.segment !== resp.data.LastPlayerTurn.LocalBoardPosition+1) {
+                                            change('seg', resp.data.LastPlayerTurn.LocalBoardPosition+1);
+                                        }
+                                    }
+                                }, 300);
                             }
                         }
                     }
                 })
                 .catch((er) => console.log(er))
         }
-    }, 1500);
+    }, 700);
+
+    setTimeout(() => {
+        clearInterval(inter)
+    }, 800);
 
     function pushh(event) {
-        if ((event.target.innerText !== 'X' || event.target.innerText !== 'O') && state.player === 'X' || state.player === 'O') {
+        if ((event.target.innerText !== 'X' || event.target.innerText !== 'O') && (state.player === 'X' || state.player === 'O')) {
             event.target.innerText = state.player;
             let data = {
                 GlobalBoardPosition: parseInt(event.target.id[0]),
@@ -71,11 +115,12 @@ function App() {
                 Player: state.player
             };
             if (data.Player !== 'null') {
+                dispatch({type: 'move', payload: state.move === 'X' ? 'O' : 'X'});
+                change('seg', parseInt(event.target.id[0]) + 1);
                 axios.post('/ApplyTurnToGameState', data, {headers: {'Game-Uuid': state.gameUUID}})
-                    .then((resp) => {
-                        dispatch({type: 'move', payload: true})
+                    .then(() => {
                     })
-                    .catch((er) => console.log(er))
+                    .catch((er) => console.log(er));
             }
         }
     }
@@ -92,6 +137,9 @@ function App() {
         axios.post('/CreateNewGame')
             .then((resp) => {
                 change('uuid', resp.data);
+                change('bot', null);
+                change('move', 'X');
+                change('seg', 'any');
             })
             .catch((er) => console.log(er));
         let cells = document.getElementsByClassName('cell');
@@ -150,6 +198,13 @@ function App() {
             <label>Input X or O</label>
             <br/>
             <input onChange={(event) => change('pl', event.target.value)}/>
+            <br/>
+            <label>Play with bot or not</label>
+            <br/>
+            <button onClick={() => setBot('bot')}>With bot</button>
+            <button onClick={() => setBot('null')}>Nope</button>
+            <h1>Whose move :{state.move}</h1>
+            <h1>Segment for move :{state.segment}</h1>
             <div id="game" className="game ">
                 <table>
                     <tr>
